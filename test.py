@@ -7,7 +7,7 @@ class Asset:
         self.pD = pD
         self.aD = aD
 
-#
+#bb
     def __str__(self):
         return "Serial Number:  {0}\nPart Number:  {1}\nWarranty:  {2}\nDOA:  {3}\nproblem description:\n{4}\nPart description:\n{5}\n===========================================================\n".format(self.serial_number, self.part_number, self.warranty, self.dOA, self.pD,self.aD)
     
