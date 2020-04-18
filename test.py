@@ -18,25 +18,36 @@ import os
 package="selenium"
 try:
     __import__(package)
+    print(package+ " imported successfully ")
 except ImportError:
     print("installing selenium....")
-    os.system("pip install "+ package)   
+    os.system("pip install "+ package+" --user")   
 package="cryptography"
 try:
     __import__(package)
+    print(package+ " imported successfully")
 except ImportError:
     print("installing cryptography....")
-    os.system("pip install "+ package)   
+    os.system("pip install "+ package+" --user")   
+package="pywin32"
+try:
+    __import__(package)
+    print(package+ " imported successfully")
+except ImportError:
+    print("installing pywin32....")
+    os.system("pip install "+ package+" --user")   
+import tkinter
 from cryptography.fernet import Fernet
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 # Import smtplib for the actual sending function
 import smtplib
-
+import win32com.client as win32
 # Import the email modules we'll need
 from email.message import EmailMessage
 from tkinter import *
-
+from tkinter import simpledialog
+from selenium.common.exceptions import NoSuchElementException       
 def download_images():
 # In order to fetch the image online  
     try:
@@ -134,8 +145,20 @@ def LoadCredential(password,username):
 
         newFile.close()
     except OSError:
+
         print("no key avalible")
     return password,username
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -148,7 +171,25 @@ def login():
     browser.implicitly_wait(5)
     browser.find_element_by_id("i0116").send_keys(username.get())
     browser.find_element_by_id("idSIButton9").click()
-    browser.implicitly_wait(30)
+    
+
+    try:
+        browser.implicitly_wait(10)#to check if the elemnt exists fast
+        browser.find_element_by_id("passwordInput").send_keys(password.get())
+        browser.find_element_by_id("submitButton").click()
+        code = simpledialog.askstring(title="Test",prompt="Please enter the code from your phone ")
+        browser.find_element_by_id("idTxtBx_SAOTCC_OTC").send_keys(code)
+        browser.find_element_by_id("idSubmit_SAOTCC_Continue").click()
+        browser.find_element_by_id("idSIButton9").click()
+
+        
+    except NoSuchElementException:
+        #login from mellanox no need for passowrd and username
+        print("elements password not found")
+        browser.implicitly_wait(30)
+
+
+
     browser.find_element_by_id("secondSearchText").clear()
 
 
@@ -183,14 +224,20 @@ def login_verify():
     browser.implicitly_wait(50)
     rma_Number = username_verify.get()
     browser.get(main_url)
-    msg = EmailMessage()
-    msg['From'] = username.get()
-    msg['To'] = 'supportadmin@mellanox.com'
-    server = smtplib.SMTP('smtp.office365.com.', 587)
-    server.ehlo()
-    server.starttls()
+
+   # msg = EmailMessage()
+    #msg['From'] = username.get()
+    #msg['To'] = 'supportadmin@mellanox.com'
+    #server = smtplib.SMTP('smtp.office365.com.', 587)
+    #server.ehlo()
+    #server.starttls()
     #Next, log in to the server
     #server.login(username.get(), password.get())
+
+    
+    #mail.HTMLBody = '<h2>HTML Message body</h2>' #this field is optional
+    
+
     
     k=rma_Number
     k=k.strip()
@@ -248,59 +295,91 @@ def login_verify():
     my_lst_str = ''.join(map(str, assetss))
     header="Number of assets: "+assets_Size_int+"\n"
     sn=sn+"\n"
-    msg.set_content(header+sn+my_lst_str)
-    msg['Subject'] =Case_ID
+    #msg.set_content(header+sn+my_lst_str)
+    #msg['Subject'] =Case_ID
+    initializeOutlook()
+    mail.Subject = Case_ID
+    mail.Body = header+sn+my_lst_str
+    
     #server.send_message(msg)
 
-    #-----------------------------------------------find RMA related
-    rma_search_url="https://mellanox.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&sen=ka&sen=00O&sen=01t&sen=00T&sen=00U&sen=a1G&sen=00a&sen=a43&sen=0F9&sen=a2v&sen=a26&sen=a28&sen=a2z&sen=0TO&sen=02s&sen=001&sen=a4F&sen=068&sen=003&sen=a4H&sen=005&sen=500&sen=a0F&sen=a0E&sen=a0H&sen=a0M&str=00751864%20&isdtp=vw&isWsVw=true&isWsVw=true&nonce=29c527472e4db3b0434215c49cac45bcaf9a8ac6f5473c5acccb8b58d751b8ce&sfdcIFrameOrigin=https%3A%2F%2Fmellanox.my.salesforce.com#!/str='219801A1E98193W00002'&initialViewMode=detail&fen=a0F&collapse=1"
-    browser.get(rma_search_url)
-    AssetsSn=sn.replace("\n"," or ")
-    browser.find_element_by_id("secondSearchText").send_keys(AssetsSn)
-    browser.find_element_by_id("secondSearchButton").click()#search
-    resultss=browser.find_elements_by_class_name('searchFirstCell')
-    number_of_search_in_RMA=resultss[0].text
-    temp=number_of_search_in_RMA.split("(")
-    temp=temp[1].split(")")
-    number_of_RMA=temp[0]
-
-    if(number_of_RMA.find("+")):
-        print("+too many")
-    else:
-        if int(number_of_RMA)>int(assets_Size_int):
-            print("there is related case")
-            pass
-
-    Case_search_url="https://mellanox.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&sen=ka&sen=00O&sen=01t&sen=00T&sen=00U&sen=a1G&sen=00a&sen=a43&sen=0F9&sen=a2v&sen=a26&sen=a28&sen=a2z&sen=0TO&sen=02s&sen=001&sen=a4F&sen=068&sen=003&sen=a4H&sen=005&sen=500&sen=a0F&sen=a0E&sen=a0H&sen=a0M&str=00751864%20&isdtp=vw&isWsVw=true&isWsVw=true&nonce=29c527472e4db3b0434215c49cac45bcaf9a8ac6f5473c5acccb8b58d751b8ce&sfdcIFrameOrigin=https%3A%2F%2Fmellanox.my.salesforce.com#!/str=.&initialViewMode=detail&fen=500&collapse=1&searchAll=true"
-    browser.get(Case_search_url)
-    browser.find_element_by_id("secondSearchText").send_keys(AssetsSn)
-    browser.find_element_by_id("secondSearchButton").click()#search
-    resultss=browser.find_elements_by_class_name('searchFirstCell')
-    related_Case=resultss[0].text
-    temp=related_Case.split("(")
-    temp=temp[1].split(")")
-    if(temp[0].find("+")):
-        print("+too many")
-    else:
-        if int(temp[0])!=0:
-            print("there is related case" )
-            pass
+    ###-----------------------------------------------find RMA related
     
+    try:
+        rma_search_url="https://mellanox.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&sen=ka&sen=00O&sen=01t&sen=00T&sen=00U&sen=a1G&sen=00a&sen=a43&sen=0F9&sen=a2v&sen=a26&sen=a28&sen=a2z&sen=0TO&sen=02s&sen=001&sen=a4F&sen=068&sen=003&sen=a4H&sen=005&sen=500&sen=a0F&sen=a0E&sen=a0H&sen=a0M&str=00751864%20&isdtp=vw&isWsVw=true&isWsVw=true&nonce=29c527472e4db3b0434215c49cac45bcaf9a8ac6f5473c5acccb8b58d751b8ce&sfdcIFrameOrigin=https%3A%2F%2Fmellanox.my.salesforce.com#!/str='219801A1E98193W00002'&initialViewMode=detail&fen=a0F&collapse=1"
+        browser.get(rma_search_url)
+        AssetsSn=sn.replace("\n"," or ",int(assets_Size_int)-1)
+        browser.find_element_by_id("secondSearchText").clear()
+        browser.find_element_by_id("secondSearchText").send_keys(AssetsSn)
+        browser.find_element_by_id("secondSearchButton").click()#search
+        resultss=browser.find_element_by_id("ext-gen46")
+        number_of_search_in_RMA=resultss.text
+        temp=number_of_search_in_RMA.split("(")
+        temp=temp[1].split(")")
+        number_of_RMA=temp[0]
 
+        if (number_of_RMA.find("+") != -1):
+            print("+too many")
+        else:
+            if int(number_of_RMA)>=int(assets_Size_int):
+                mail.Body="There is NO previews RMA for the assets\n"+mail.Body
+                print("There is NO previews RMA for the assets")
+            else:
+                mail.Body="There is previews RMA for the assets\n"+mail.Body
+                print("there is previews RMA for the assets")
 
+    except ValueError:
+        print(ValueError)
+        pass
+    
+    try:
+        Case_search_url="https://mellanox.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&sen=ka&sen=00O&sen=01t&sen=00T&sen=00U&sen=a1G&sen=00a&sen=a43&sen=0F9&sen=a2v&sen=a26&sen=a28&sen=a2z&sen=0TO&sen=02s&sen=001&sen=a4F&sen=068&sen=003&sen=a4H&sen=005&sen=500&sen=a0F&sen=a0E&sen=a0H&sen=a0M&str=00751864%20&isdtp=vw&isWsVw=true&isWsVw=true&nonce=29c527472e4db3b0434215c49cac45bcaf9a8ac6f5473c5acccb8b58d751b8ce&sfdcIFrameOrigin=https%3A%2F%2Fmellanox.my.salesforce.com#!/str=.&initialViewMode=detail&fen=500&collapse=1&searchAll=true"
+        browser.get(Case_search_url)
+        browser.find_element_by_id("secondSearchText").clear()
+        browser.find_element_by_id("secondSearchText").send_keys(AssetsSn)
+        browser.find_element_by_id("secondSearchButton").click()#search
+        resultss=browser.find_element_by_id("ext-gen52")
+        related_Case=resultss.text
+        temp=related_Case.split("(")
+        temp=temp[1].split(")")
+        number_of_RMA=temp[0]
+        if (number_of_RMA.find("+") != -1):
+            print("+too many")
+        else:
+            if int(number_of_RMA)>=int(assets_Size_int):
+                mail.Body="There is NO previews RMA case for the assets\n"+mail.Body
+                print("There is NO previews RMA case for the assets")
+            else:
+                mail.Body="There is previews RMA case for the assets\n"+mail.Body
+                print("there is previews RMA case for the assets")
+
+    except ValueError:
+        print(ValueError)
+        pass
+
+    mail.Send()        
 
     #need to check if assets allready in preview RMA
     #SnList=sn.splitlines()
     
     #need if RMA related to case
 
-
-
-
-    server.quit()
-
 #
 
+def initializeOutlook():
+    
+    global mail
+    global outlook
+    outlook = win32.Dispatch('outlook.application')
+    mail = outlook.CreateItem(0)
+    mail.To = 'mh_mouds@hotmail.com'
+
+    for account in outlook.Session.Accounts:
+        if("@mellanox.com" in account.DisplayName):
+            username=account.DisplayName
+            print(account.DisplayName)
+
+    return  StringVar(register_screen, value=username)
 
 
 # Designing Main(first) window
@@ -316,6 +395,7 @@ def main_account_screen():
     global password_entry
     username = StringVar(register_screen, value='')
     password = StringVar(register_screen, value='')
+    username=initializeOutlook()
     password,username=LoadCredential(password,username)
  
     Label(register_screen, text="").pack()
