@@ -1,23 +1,38 @@
 import win32com.client as win32
+from datetime import datetime
+from datetime import timedelta
 
-outlook = win32.Dispatch('outlook.application')
+outlook = win32.Dispatch('outlook.application').GetNamespace("MAPI")
 #Data=outlook.mailItem
-mail = outlook.CreateItem(0)
-mail.To = 'mh_mouds@hotmail.com'
-mail.Subject = 'Message subject'
-mail.Body = 'Message body'
-mail.HTMLBody = '<h2>HTML Message body</h2>' #this field is optional
+inbox  = outlook.GetDefaultFolder(6)
+messages = inbox.Items
 
-print(mail.MessageClass)
-print(mail.HTMLBody)
 
-for account in outlook.Session.Accounts:
-        if("@mellanox.com" in account.DisplayName):
-            print(account.DisplayName)
-           
+currentDT = datetime.now()
+print (str(currentDT))
+currentDT=currentDT-timedelta(minutes=20)
 
-# To attach a file to the email (optional):
-#attachment  = "Path to the attachment"
-#mail.Attachments.Add(attachment)
+print (currentDT.strftime("%m/%d/%Y %H:%M:%S"))
 
-#mail.Send()
+message=messages.find("[ReceivedTime] >'"+ str(currentDT.strftime("%m/%d/%Y %H:%M"))+"' And [From]='Mahmoud Sayid'")
+
+
+
+#message = messages.GetFirst ()
+try:
+    received_time = str(message.ReceivedTime)
+    print  (message.Subject+"time "+received_time )
+    messages.Sort 
+    message = messages.GetFirst ()
+    received_time = str(message.ReceivedTime)
+    print  (message.Subject+"time "+received_time )
+
+    print ('total messages: ', len(messages))
+
+except Exception as err:
+    print(err)
+
+
+
+#Mellanox Support Admin <supportadmin@mellanox.com>
+
