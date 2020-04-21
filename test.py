@@ -72,6 +72,7 @@ def download_images():
         url.urlretrieve("https://ucb1d9488fa18564d2e9e0cd572c.dl.dropboxusercontent.com/cd/0/get/A0pvCQ4jHHt9nsbsVgjORq34Gj0yzi1pEVXG1YrCKVdqR-5siXliNVI9S5z3kDt8jFdMaCjMxeCDF4heEzYJ78F-CNiof00yKHPWTy_t741ADAua4InXC5L10C4lczbPCuE/file?_download_id=52500573738052191167474377859756385038390858859054808382686637678&_notify_domain=www.dropbox.com&dl=1", "chromedriver.exe")
         print("Downloading completed.")
 
+#https://dl.boxcloud.com/d/1/b1!BWEj6KfqzFcPnfTFN6ouZ4LVngba7vhISr-U2RvORFH1uPxBVeWit6hngiQ2LAvt-0ZnT_0u4mD4qRA3BQ_Q6Mr5Tsf10U79i3648NWX___VziFjU38XzLdCP6Lwku0O9P2JdvjkBC7Z-ZgKaeOGwMrtXeqRgiH4nGOqaxYjA7y3A2dJeWrjiZ5QKWWdosjkNdBEncomooqOjOGSqy3dMzIp6aB00Re47UBT-QuszoIWrPtVx1cuAHnL-v-F8HDMQzO9mYLf3skUwV0gQ1xA-TJnG91VMS9hh2eX1Xl80phZPbs72Ii1EwcWDgdkGlpH9ciUrtGqjzETw_F0KoGNu0ifNfp9F-TN83xcCWale5qkFbeF8_5sqOJBuxY5zIaHoLF7Q03t9ioIcqLBHVx2RyuZxC5hf1W8zhJGf3fet3XuOAEPwqzKhCIw_oYV7bIfnb0L2J2Hv6BLUG4qtLynk-3IiiO7JN9UFaOa0yyIXS1QIWRjwMtr5yZx52tCGMLa5diHgHqNiaoXoG35coGo0GT-TuQmN87dVJWqYtN76aFEBSzbEIZrNtHV-jXBy7-F7_u1xPZgU6Sav8q2HlVbxka3U12E7q9CRuSHONZyxl_bT5ctFsWwBk_ic5Mm8MwRFX6SYC3qXdiRflkIGaWYb1clpIrllHYUFrwiJX2F8rp0kbQ-n68sk_AMXUO8jpyqKtUBKSD-3Xr5KZRsZQJxIqjHLNVlUscISjtVLbbfyVMq6noa6TLPUBqFlojKrBPiYQNaS6CQY0qfS1aAi2D0ztDChHKYKLnagu12w6UVpnrq-Kmx5vuqsd2kg7Pn00AYAte5fByGlQsWRTKEZLaKYZ9iwPIskl5W16ltydYLUebCoicBq0q9Ik021LZXr1pMMbHM-iy3SsIzkUX-qvzu7tnOvJTq1darpTDx70GBSBvlSV2Hzk2cTmHpk-asfam0WyhEBGoclqJ7xDhHoDKBTtSMLm8Hoh1brRunxg1SurxvWhRZoJ1TdlCQuH2ThZYcW8XWZeWb6tZdAeySVHLWsDVMV8LrBYLTKdPEfJecvr-EcedbPKqpBVBuT2gaWGW12ZmXU-UpBGYwxJDKMXuEFo9fIShpSJQiEOx6iz1DieU91b8omcgSgGLzSQ-Q7z5qnMIiXG4nbb5MOAqvcf_1gxCGtsXTVUKyTGzkXj6su0eB9YWosGumVA935inv-mG8bCo73MBMtCGeNl-bCuB58wrOuJATyTN2kZecE20ulTYqnIFwFSA_4589SGfmoWFnqzQlK7KzECr3MIPeETKFqM0BLRNcig../download
 
 
 download_images()
@@ -328,8 +329,8 @@ def login_verify():
                 mail.Body="There is previews RMA for the assets\n"+mail.Body
                 print("there is previews RMA for the assets")
 
-    except ValueError:
-        print(ValueError)
+    except Exception:
+        print(Exception)
         pass
     
     try:
@@ -353,8 +354,8 @@ def login_verify():
                 mail.Body="There is previews RMA case for the assets\n"+mail.Body
                 print("there is previews RMA case for the assets")
 
-    except ValueError:
-        print(ValueError)
+    except Exception:
+        print(Exception)
         pass
 
     mail.Send()        
@@ -372,7 +373,7 @@ def initializeOutlook():
     global outlook
     outlook = win32.Dispatch('outlook.application')
     mail = outlook.CreateItem(0)
-    mail.To = 'mh_mouds@hotmail.com'
+    mail.To = 'supportadmin@mellanox.com'
 
     for account in outlook.Session.Accounts:
         if("@mellanox.com" in account.DisplayName):
