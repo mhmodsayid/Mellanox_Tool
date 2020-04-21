@@ -80,7 +80,7 @@ download_images()
 
 
 options = webdriver.ChromeOptions()
-#options.arguments.append("headless")#hide the browser
+options.arguments.append("headless")#hide the browser
 browser = webdriver.Chrome(executable_path="chromedriver.exe", chrome_options=options)
 main_url = 'https://mellanox.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&sen=ka&sen=00O&sen=01t&sen=00T&sen=00U&sen=a1G&sen=00a&sen=a43&sen=0F9&sen=a2v&sen=a26&sen=a28&sen=a2z&sen=0TO&sen=02s&sen=001&sen=a4F&sen=068&sen=003&sen=a4H&sen=005&sen=500&sen=a0F&sen=a0E&sen=a0H&sen=a0M&str=00751864%20&isdtp=vw&isWsVw=true&isWsVw=true&nonce=29c527472e4db3b0434215c49cac45bcaf9a8ac6f5473c5acccb8b58d751b8ce&sfdcIFrameOrigin=https%3A%2F%2Fmellanox.my.salesforce.com'
 # Designing window for registration
