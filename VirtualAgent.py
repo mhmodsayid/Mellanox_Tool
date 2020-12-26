@@ -243,6 +243,10 @@ def swap_page(page):
         widget['image'] = widget.lenna_image_png
         Button(Main_menu, text="RMA Agent", width=30, height=1, command = lambda: swap_page("RMA_screen")).pack()
         Button(Main_menu, text="SN to GUID", width=30, height=1, command = lambda: swap_page("Traceability_screen")).pack()
+        Button(Main_menu, text="Case Agent", width=30, height=1, command = lambda: swap_page("Traceability_screen")).pack()
+        Button(Main_menu, text="Test", width=30, height=1, command = first_reply).pack()
+
+
         widget.pack()
         register_screen.withdraw()
         Main_menu.protocol("WM_DELETE_WINDOW", close)
@@ -306,7 +310,12 @@ def swap_page(page):
         widget = Label(login_screen, compound='top')
         widget.lenna_image_png=PhotoImage(file=Main_path+"\\Mellanox.png")
         widget['image'] = widget.lenna_image_png
-        Button(login_screen, text="Dequeue, Add summary comment", width=30, height=1, command = DQ_Sumary_OEM).pack()
+        Button(login_screen, text="Dequeue,Summary,First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("all")).pack()
+        Button(login_screen, text="Dequeue", width=30, height=1, command = lambda: DQ_Sumary_OEM("DQ") ).pack()
+        Button(login_screen, text="Add summary comment", width=30, height=1, command = lambda: DQ_Sumary_OEM("comment")).pack()
+        Button(login_screen, text="Dequeue,Summary", width=30, height=1, command = lambda: DQ_Sumary_OEM()).pack()
+        Button(login_screen, text="First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("review")).pack()
+
         widget.pack()
         Main_menu.withdraw()
         login_screen.protocol("WM_DELETE_WINDOW", close)
@@ -424,10 +433,25 @@ def search_related_issue():
         Data.append(rows[row].text.split("."))
     print(Data)
 
+def first_reply(x=0):
+    chrome_possion("show")
+    RMA_page="https://wikinox.mellanox.com/display/FLS/RMA+page+for+script"
+    browser.get(RMA_page)
+    table = browser.find_elements_by_class_name("confluenceTd")
+    message=table[x*4+3].text
+    return message
+
+def public_comment(command,case_id,messange):
+    if command=="first_reply":
+        initializeOutlook()
+        mail.Subject = "external "+case_id
+        #mail.Subject = case_id
+        mail.Body = messange
+        print(mail.Body)
+        mail.Send()    
 
 
-
-def DQ_Sumary_OEM():
+def DQ_Sumary_OEM(command=None):
     chrome_possion("hide")
     #chrome_possion("show")
     #chrome_driver_lunch()
@@ -440,7 +464,7 @@ def DQ_Sumary_OEM():
         k=k.strip()
         
         time.sleep(5)
-        browser.get_screenshot_as_file("screenshot.png")    
+        #browser.get_screenshot_as_file("screenshot.png")    
         browser.find_element_by_id("secondSearchText").clear()
         browser.find_element_by_id("secondSearchText").send_keys(k)
         browser.find_element_by_id("secondSearchButton").click()
@@ -450,6 +474,8 @@ def DQ_Sumary_OEM():
 
         browser.find_element_by_link_text(k).click()
         accountName=browser.find_element_by_id("cas4_ileinner").text
+        contact=browser.find_element_by_id("cas3_ileinner").text
+        
         FA_request=browser.find_element_by_id("00N50000002SCEj_ileinner").text
         related_case=browser.find_element_by_id("CF00N50000002SFLs_ilecell").text
 
@@ -457,102 +483,102 @@ def DQ_Sumary_OEM():
 
         Case_ID=browser.find_element_by_xpath('/html/body/div[4]/div[2]/div[4]/table/tbody/tr[1]/td[4]/div').text
 
-       
-        DQ()
+        if command==None or command=="DQ" or command=="all":
+            DQ()
+        if command==None or command=="comment" or command=="all":
+            #get RMA summery
+            browser.find_element_by_xpath('/html/body/div[4]/div[2]/div[4]/table/tbody/tr[2]/td[2]/div/a').click()                
+            assets_Size_int=browser.find_element_by_id("00N50000002RhrW_ileinner").text
+            if(int(assets_Size_int)>5):
+                try:
+                    browser.find_element_by_partial_link_text('Go to list (').click()
+                except:
+                    print("No need for extend the list\n")
 
-        #get RMA summery
-        browser.find_element_by_xpath('/html/body/div[4]/div[2]/div[4]/table/tbody/tr[2]/td[2]/div/a').click()                
-        assets_Size_int=browser.find_element_by_id("00N50000002RhrW_ileinner").text
-        if(int(assets_Size_int)>5):
-            try:
-                browser.find_element_by_partial_link_text('Go to list (').click()
-            except:
-                print("No need for extend the list\n")
+            
+            
+            browser.find_element_by_xpath("//*[text()='RMA Type final']").click()
+            Data = browser.find_elements_by_class_name('dataCell')
+            sn=""
+            index=[0,1,2,3,4,8]
+            assetss = []  
+            print(len(Data))
+            numofassets=0
+            i=0
+            lastwarranty=""
+            if(len(Data)/10)<int(assets_Size_int):
+                while numofassets<int(assets_Size_int):#i is the number of assets
+                    for i in range(int(len(Data)/10)):
+                        numofassets+=1
 
-        
-        
-        browser.find_element_by_xpath("//*[text()='RMA Type final']").click()
-        Data = browser.find_elements_by_class_name('dataCell')
-        sn=""
-        index=[0,1,2,3,4,8]
-        assetss = []  
-        print(len(Data))
-        numofassets=0
-        i=0
-        lastwarranty=""
-        if(len(Data)/10)<int(assets_Size_int):
-            while numofassets<int(assets_Size_int):#i is the number of assets
-                for i in range(int(len(Data)/10)):
-                    numofassets+=1
+                        if Data[index[4]+(10*i)].text.find('...')!= -1:
+                            browser.find_element_by_xpath('//*[@title='+Data[index[1]+(10*i)].text+']').click()
+                            Data[index[4]+(10*i)].text=browser.find_element_by_id("00N50000001vo8N_ilecell").text
+                            browser.back()
+                            pass
 
+                        assetss.append(Asset(Data[index[0]+(10*i)].text,Data[index[1]+(10*i)].text,Data[index[2]+(10*i)].text,Data[index[3]+(10*i)].text,Data[index[4]+(10*i)].text,Data[index[5]+(10*i)].text))
+                        sn=sn+Data[index[0]+(10*i)].text+"\n"
+                        if lastwarranty=="" or Data[index[2]+(10*i)].text!=lastwarranty :
+                            lastwarranty=Data[index[2]+(10*i)].text
+                            sn=sn+"\nWarranty: "+lastwarranty+"\n\n"
+                            
+                    if numofassets<int(assets_Size_int):
+
+                        browser.find_element_by_partial_link_text('Next Page>').click()
+                        browser.find_element_by_xpath("//*[text()='RMA Type final']").click()
+                        Data = browser.find_elements_by_class_name('dataCell')
+
+
+
+            else:
+                for i in range(int(assets_Size_int)):
                     if Data[index[4]+(10*i)].text.find('...')!= -1:
-                        browser.find_element_by_xpath('//*[@title='+Data[index[1]+(10*i)].text+']').click()
-                        Data[index[4]+(10*i)].text=browser.find_element_by_id("00N50000001vo8N_ilecell").text
+                        Data[index[0]+(10*i)].click()
+                        New_Problem_Description=browser.find_element_by_id("00N50000001vo8N_ileinner").text
                         browser.back()
-                        pass
-
-                    assetss.append(Asset(Data[index[0]+(10*i)].text,Data[index[1]+(10*i)].text,Data[index[2]+(10*i)].text,Data[index[3]+(10*i)].text,Data[index[4]+(10*i)].text,Data[index[5]+(10*i)].text))
-                    sn=sn+Data[index[0]+(10*i)].text+"\n"
-                    if lastwarranty=="" or Data[index[2]+(10*i)].text!=lastwarranty :
-                        lastwarranty=Data[index[2]+(10*i)].text
-                        sn=sn+"\nWarranty: "+lastwarranty+"\n\n"
+                        Data = browser.find_elements_by_class_name('dataCell')
+                        assetss.append(Asset(Data[index[0]+(10*i)].text,Data[index[1]+(10*i)].text,Data[index[2]+(10*i)].text,Data[index[3]+(10*i)].text,New_Problem_Description,Data[index[5]+(10*i)].text))
                         
-                if numofassets<int(assets_Size_int):
+                    else:
+                        assetss.append(Asset(Data[index[0]+(10*i)].text,Data[index[1]+(10*i)].text,Data[index[2]+(10*i)].text,Data[index[3]+(10*i)].text,Data[index[4]+(10*i)].text,Data[index[5]+(10*i)].text))
+                    sn=sn+Data[index[0]+(10*i)].text+"\n"
+                
 
-                    browser.find_element_by_partial_link_text('Next Page>').click()
-                    browser.find_element_by_xpath("//*[text()='RMA Type final']").click()
-                    Data = browser.find_elements_by_class_name('dataCell')
-
-
-
-        else:
-            for i in range(int(assets_Size_int)):
-                if Data[index[4]+(10*i)].text.find('...')!= -1:
-                    Data[index[0]+(10*i)].click()
-                    New_Problem_Description=browser.find_element_by_id("00N50000001vo8N_ileinner").text
-                    browser.back()
-                    Data = browser.find_elements_by_class_name('dataCell')
-                    assetss.append(Asset(Data[index[0]+(10*i)].text,Data[index[1]+(10*i)].text,Data[index[2]+(10*i)].text,Data[index[3]+(10*i)].text,New_Problem_Description,Data[index[5]+(10*i)].text))
-                    
-                else:
-                    assetss.append(Asset(Data[index[0]+(10*i)].text,Data[index[1]+(10*i)].text,Data[index[2]+(10*i)].text,Data[index[3]+(10*i)].text,Data[index[4]+(10*i)].text,Data[index[5]+(10*i)].text))
-                sn=sn+Data[index[0]+(10*i)].text+"\n"
+            
+            print("Current Page Title is : %s" %browser.title)
             
 
-        
-        print("Current Page Title is : %s" %browser.title)
-        
+            my_lst_str = ''.join(map(str, assetss))
+            header="Number of assets: "+assets_Size_int+"\n"
+            sn=sn+"\n"
+            #msg.set_content(header+sn+my_lst_str)
+            #msg['Subject'] =Case_ID
+            initializeOutlook()
+            mail.Subject = Case_ID
+            mail.Body = header+sn+my_lst_str
+            
+            #server.send_message(msg)
+            #set if FA needed
+            mail.Body="Failure Analysis Request: "+FA_request+"\n"+mail.Body
+            if related_case!="":
+                mail.Body="Related case: "+related_case+"\n"+mail.Body
+            ###-----------------------------------------------find RMA relate
+            # d
+            SNlist=sn.split("\n")
+            search_for_previews_cases(SNlist)
+            search_for_related_RMA(SNlist)
+            search_if_OEM(accountName)
+            search_related_issue()
+            print(mail.Body)
+            mail.Send()      
 
-        my_lst_str = ''.join(map(str, assetss))
-        header="Number of assets: "+assets_Size_int+"\n"
-        sn=sn+"\n"
-        #msg.set_content(header+sn+my_lst_str)
-        #msg['Subject'] =Case_ID
-        initializeOutlook()
-        mail.Subject = Case_ID
-        mail.Body = header+sn+my_lst_str
-        
-        #server.send_message(msg)
-        #set if FA needed
-        mail.Body="Failure Analysis Request: "+FA_request+"\n"+mail.Body
-        if related_case!="":
-            mail.Body="Related case: "+related_case+"\n"+mail.Body
-        ###-----------------------------------------------find RMA relate
-        # d
-        SNlist=sn.split("\n")
+        if command=="all" or command=="review":
+            message=first_reply(x=0)
+            message="Hello "+contact+",\n\n\n"+message
+            public_comment("first_reply",Case_ID,message)
+            
 
-        search_for_previews_cases(SNlist)
-
-        search_for_related_RMA(SNlist)
-
-        search_if_OEM(accountName)
-
-        search_related_issue()
-        
-        print(mail.Body)
-        mail.Send()        
-
-    
 
 def initializeOutlook():
     
@@ -560,7 +586,7 @@ def initializeOutlook():
     global outlook
     outlook = win32.Dispatch('outlook.application')
     mail = outlook.CreateItem(0)
-    mail.To = 'supportadmin@mellanox.com'
+    mail.To = 'networking-support@nvidia.com'
     #mail.To = 'mh_mouds@hotmail.com'
 
     for account in outlook.Session.Accounts:
