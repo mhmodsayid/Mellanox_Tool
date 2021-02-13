@@ -227,33 +227,24 @@ def Traceability(path,data):
     messagebox.showinfo(title="Warning ", message="Done, Plesae find result.txt")
 
 
-def swap_page(page):
-    
-    #chrome_possion("hide")
-
-    if page=="Main_menu":
-        global Main_menu
-        Main_menu = Toplevel(register_screen)
-        Main_menu.title("Mellanox AutoAgent")
-        Main_menu.geometry("450x450")
-        Label(Main_menu, text="Please select you agent").pack()
-        global username_login_entry
-        widget = Label(Main_menu, compound='top')
-        widget.lenna_image_png=PhotoImage(file=Main_path+"\\Mellanox.png")
-        widget['image'] = widget.lenna_image_png
-        Button(Main_menu, text="RMA Agent", width=30, height=1, command = lambda: swap_page("RMA_screen")).pack()
-        Button(Main_menu, text="SN to GUID", width=30, height=1, command = lambda: swap_page("Traceability_screen")).pack()
-        Button(Main_menu, text="Case Agent", width=30, height=1, command = lambda: swap_page("Traceability_screen")).pack()
-        Button(Main_menu, text="Test", width=30, height=1, command = first_reply).pack()
-
-
-        widget.pack()
-        register_screen.withdraw()
-        Main_menu.protocol("WM_DELETE_WINDOW", close)
-
-    if page=="Traceability_screen":
-
-        #chrome_possion("show")#need to deeeletee
+def menu_page():
+    global Main_menu
+    Main_menu = Toplevel(register_screen)
+    Main_menu.title("Mellanox AutoAgent")
+    Main_menu.geometry("450x450")
+    Label(Main_menu, text="Please select you agent").pack()
+    global username_login_entry
+    widget = Label(Main_menu, compound='top')
+    widget.lenna_image_png=PhotoImage(file=Main_path+"\\Mellanox.png")
+    widget['image'] = widget.lenna_image_png
+    Button(Main_menu, text="RMA Agent", width=30, height=1, command = lambda: swap_page("RMA_screen")).pack()
+    Button(Main_menu, text="SN to GUID", width=30, height=1, command = lambda: swap_page("Traceability_screen")).pack()
+    Button(Main_menu, text="Case Agent", width=30, height=1, command = lambda: swap_page("Case Agent")).pack()
+    widget.pack()
+    register_screen.withdraw()
+    Main_menu.protocol("WM_DELETE_WINDOW", close)
+def Traceability_page():
+    #chrome_possion("show")#need to deeeletee
         global file_path
         content=""
         file_path=StringVar()
@@ -272,9 +263,7 @@ def swap_page(page):
                 if ("Sign In" in browser.page_source):
                     chrome_possion("show")
                     messagebox.showinfo(title="Warning ", message="Please sign in")
-                
-
-
+    
         global Traceability_screen
         Traceability_screen = Toplevel(Main_menu)
         Traceability_screen.title("Mellanox AutoAgent")
@@ -294,31 +283,71 @@ def swap_page(page):
         widget.place( relx = 0.5, rely = 0.35,anchor = CENTER)
         Main_menu.withdraw()
         Traceability_screen.protocol("WM_DELETE_WINDOW", close)
+def RMA_page():
+    global login_screen
+    login_screen = Toplevel(Main_menu)
+    login_screen.title("Mellanox AutoAgent")
+    login_screen.geometry("450x450")
+    Label(login_screen, text="Please enter RMA Details bellow:").pack()
+    global username_verify
+    username_verify = StringVar()
+    global username_login_entry
+    Label(login_screen, text="RMA case number:").pack()
+    username_login_entry = Entry(login_screen, textvariable=username_verify)
+    username_login_entry.pack()
+    widget = Label(login_screen, compound='top')
+    widget.lenna_image_png=PhotoImage(file=Main_path+"\\Mellanox.png")
+    widget['image'] = widget.lenna_image_png
+    Button(login_screen, text="Dequeue,Summary,First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("all")).pack()
+    Button(login_screen, text="Dequeue", width=30, height=1, command = lambda: DQ_Sumary_OEM("DQ") ).pack()
+    Button(login_screen, text="Add summary comment", width=30, height=1, command = lambda: DQ_Sumary_OEM("comment")).pack()
+    Button(login_screen, text="Dequeue,Summary", width=30, height=1, command = lambda: DQ_Sumary_OEM()).pack()
+    Button(login_screen, text="First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("review")).pack()
+
+    widget.pack()
+    Main_menu.withdraw()
+    login_screen.protocol("WM_DELETE_WINDOW", close)
+def Case_page():
+    global login_screen
+    login_screen = Toplevel(Main_menu)
+    login_screen.title("Mellanox AutoAgent")
+    login_screen.geometry("450x450")
+    Label(login_screen, text="Please enter case Details bellow:").pack()
+    global username_verify
+    username_verify = StringVar()
+    global username_login_entry
+    Label(login_screen, text="case number:").pack()
+    username_login_entry = Entry(login_screen, textvariable=username_verify)
+    username_login_entry.pack()
+    widget = Label(login_screen, compound='top')
+    widget.lenna_image_png=PhotoImage(file=Main_path+"\\Mellanox.png")
+    widget['image'] = widget.lenna_image_png
+    Button(login_screen, text="Dequeue,Summary,First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("all")).pack()
+    Button(login_screen, text="Dequeue", width=30, height=1, command = lambda: DQ_Sumary_OEM("DQ") ).pack()
+    Button(login_screen, text="Add summary comment", width=30, height=1, command = lambda: DQ_Sumary_OEM("comment")).pack()
+    Button(login_screen, text="Dequeue,Summary", width=30, height=1, command = lambda: DQ_Sumary_OEM()).pack()
+    Button(login_screen, text="First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("review")).pack()
+
+    widget.pack()
+    Main_menu.withdraw()
+    login_screen.protocol("WM_DELETE_WINDOW", close)
+
+def swap_page(page):
+
+    #chrome_possion("hide")
+
+    if page=="Main_menu":
+        menu_page()
+
+    if page=="Traceability_screen":
+        Traceability_page()
 
     if page=="RMA_screen":
-        global login_screen
-        login_screen = Toplevel(Main_menu)
-        login_screen.title("Mellanox AutoAgent")
-        login_screen.geometry("450x450")
-        Label(login_screen, text="Please enter RMA Details bellow:").pack()
-        global username_verify
-        username_verify = StringVar()
-        global username_login_entry
-        Label(login_screen, text="RMA case number:").pack()
-        username_login_entry = Entry(login_screen, textvariable=username_verify)
-        username_login_entry.pack()
-        widget = Label(login_screen, compound='top')
-        widget.lenna_image_png=PhotoImage(file=Main_path+"\\Mellanox.png")
-        widget['image'] = widget.lenna_image_png
-        Button(login_screen, text="Dequeue,Summary,First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("all")).pack()
-        Button(login_screen, text="Dequeue", width=30, height=1, command = lambda: DQ_Sumary_OEM("DQ") ).pack()
-        Button(login_screen, text="Add summary comment", width=30, height=1, command = lambda: DQ_Sumary_OEM("comment")).pack()
-        Button(login_screen, text="Dequeue,Summary", width=30, height=1, command = lambda: DQ_Sumary_OEM()).pack()
-        Button(login_screen, text="First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("review")).pack()
+        RMA_page()
 
-        widget.pack()
-        Main_menu.withdraw()
-        login_screen.protocol("WM_DELETE_WINDOW", close)
+    if page=="Case Agent":
+        Case_page()
+
 
 def login():
 
@@ -495,8 +524,6 @@ def DQ_Sumary_OEM(command=None):
                 except:
                     print("No need for extend the list\n")
 
-            
-            
             browser.find_element_by_xpath("//*[text()='RMA Type final']").click()
             Data = browser.find_elements_by_class_name('dataCell')
             sn=""
@@ -528,9 +555,6 @@ def DQ_Sumary_OEM(command=None):
                         browser.find_element_by_partial_link_text('Next Page>').click()
                         browser.find_element_by_xpath("//*[text()='RMA Type final']").click()
                         Data = browser.find_elements_by_class_name('dataCell')
-
-
-
             else:
                 for i in range(int(assets_Size_int)):
                     if Data[index[4]+(10*i)].text.find('...')!= -1:
@@ -544,11 +568,8 @@ def DQ_Sumary_OEM(command=None):
                         assetss.append(Asset(Data[index[0]+(10*i)].text,Data[index[1]+(10*i)].text,Data[index[2]+(10*i)].text,Data[index[3]+(10*i)].text,Data[index[4]+(10*i)].text,Data[index[5]+(10*i)].text))
                     sn=sn+Data[index[0]+(10*i)].text+"\n"
                 
-
-            
             print("Current Page Title is : %s" %browser.title)
             
-
             my_lst_str = ''.join(map(str, assetss))
             header="Number of assets: "+assets_Size_int+"\n"
             sn=sn+"\n"
