@@ -1,4 +1,15 @@
 #@By Mahmoud sayid
+class Task:
+
+    def __init__(self,case_number,command) -> None:
+        self.case_number = case_number
+        self.command= command
+    def __str__(self):
+        return "Serial number: {0}   |    GUID: {1}\n".format(self.case_number,self.command)
+
+    def __repr__(self):
+        return "Task has been done {0} |  {1}\n".format(self.case_number,self.command)
+
 
 class Basic_asset:
     def __init__(self,serial_number,GUID=None):
@@ -50,12 +61,12 @@ def imports(package):
     except ImportError:
         print("installing "+package+"....")
         os.system("pip install "+ package+" --user")   
-    
 #global browser
 imports("selenium")
 imports("cryptography")
 imports("pywin32")
-
+import threading
+from queue import Queue
 import tkinter
 from cryptography.fernet import Fernet
 from selenium import webdriver
@@ -76,7 +87,8 @@ try:
 except ImportError:
     import urllib as url
     print("Downloading compoments....")
-
+cases_Q = Queue()
+import pythoncom
 Tracebility_URL="https://360.mellanox.com/mquery/trace.php"
 
 
@@ -225,7 +237,42 @@ def Traceability(path,data):
         pass
     write_list(result_list)
     messagebox.showinfo(title="Warning ", message="Done, Plesae find result.txt")
+def case_comment(task:Task):
+    chrome_possion("show")
+    command=task.command
+    case_Number=task.case_number
+    SF_lightning = "https://mellanox.lightning.force.com/lightning/r/Case/5001T00001QnhArQAJ/view"
+    browser.get(SF_lightning)
+    while not page_is_loading(browser):
+        continue
+    time.sleep(1)
+    browser.find_element_by_xpath('//div[@class="uiInput uiAutocomplete uiInput--default"] //input[@title="Search..."]').click()
+    while not page_is_loading(browser):
+        continue
+    time.sleep(1)
+    browser.find_element_by_xpath('//div[@class="uiInput uiAutocomplete uiInput--default"] //input[@title="Search..."]').send_keys(case_Number)
+    while not page_is_loading(browser):
+        continue
+    time.sleep(1)
+    browser.find_element_by_xpath('//mark[contains(text(),'+case_Number+')]/..').click()
+    while not page_is_loading(browser):
+        continue
+    time.sleep(1)
+    Case_id=browser.find_element_by_xpath('//div[@class="windowViewMode-maximized active lafPageHost"] //lightning-formatted-text[contains(text(),"ref")]').text
+    contact=browser.find_element_by_xpath('//div[@class="windowViewMode-maximized active lafPageHost"] //p[contains(text(),"Contact Name")]//..//a').text
+    result={
+        'case First reply':lambda x:0,
+        'case LOGS': lambda x: 2,
+        'case Department': lambda x: 3,
+        'case Reviewing': lambda x: 1
+    }[task.command](None)
+    browser.find_element_by_xpath('//header[@class="slds-global-header_container branding-header slds-no-print oneHeader"] //button[@title="Close '+case_Number+'"]').click()
+    
 
+
+    message= get_message(result)
+    message="Hello "+contact+",\n\n\n"+message
+    public_comment(Case_id,message)
 
 def menu_page():
     global Main_menu
@@ -278,7 +325,7 @@ def Traceability_page():
 
         e1=Entry(Traceability_screen, textvariable=file_path,relief=SUNKEN, width=45)
         e1.place(relx = 0.60, rely = 0.75, anchor = CENTER)
-
+        Button(login_screen, text="Back", width=30, height=1, command = lambda: menu_page()).pack()
         Button(Traceability_screen, text="Convert file", command = lambda: Traceability(file_location,content)).place(relx = 0.12, rely = 0.85, anchor = CENTER)
         widget.place( relx = 0.5, rely = 0.35,anchor = CENTER)
         Main_menu.withdraw()
@@ -298,12 +345,12 @@ def RMA_page():
     widget = Label(login_screen, compound='top')
     widget.lenna_image_png=PhotoImage(file=Main_path+"\\Mellanox.png")
     widget['image'] = widget.lenna_image_png
-    Button(login_screen, text="Dequeue,Summary,First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("all")).pack()
-    Button(login_screen, text="Dequeue", width=30, height=1, command = lambda: DQ_Sumary_OEM("DQ") ).pack()
-    Button(login_screen, text="Add summary comment", width=30, height=1, command = lambda: DQ_Sumary_OEM("comment")).pack()
-    Button(login_screen, text="Dequeue,Summary", width=30, height=1, command = lambda: DQ_Sumary_OEM()).pack()
-    Button(login_screen, text="First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("review")).pack()
-
+    Button(login_screen, text="Dequeue+Summary+First_reply", width=30, height=1, command = lambda: RMA_task("all")).pack()
+    Button(login_screen, text="Dequeue", width=30, height=1, command = lambda: RMA_task("DQ") ).pack()
+    Button(login_screen, text="summary", width=30, height=1, command = lambda: RMA_task("comment")).pack()
+    Button(login_screen, text="Dequeue+Summary", width=30, height=1, command = lambda: RMA_task()).pack()
+    Button(login_screen, text="First reply", width=30, height=1, command = lambda: RMA_task("review")).pack()
+    Button(login_screen, text="Back", width=30, height=1, command = lambda: menu_page()).pack()
     widget.pack()
     Main_menu.withdraw()
     login_screen.protocol("WM_DELETE_WINDOW", close)
@@ -322,18 +369,20 @@ def Case_page():
     widget = Label(login_screen, compound='top')
     widget.lenna_image_png=PhotoImage(file=Main_path+"\\Mellanox.png")
     widget['image'] = widget.lenna_image_png
-    Button(login_screen, text="Dequeue,Summary,First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("all")).pack()
-    Button(login_screen, text="Dequeue", width=30, height=1, command = lambda: DQ_Sumary_OEM("DQ") ).pack()
-    Button(login_screen, text="Add summary comment", width=30, height=1, command = lambda: DQ_Sumary_OEM("comment")).pack()
-    Button(login_screen, text="Dequeue,Summary", width=30, height=1, command = lambda: DQ_Sumary_OEM()).pack()
-    Button(login_screen, text="First_reply", width=30, height=1, command = lambda: DQ_Sumary_OEM("review")).pack()
+    Button(login_screen, text="First reply", width=30, height=1, command = lambda: case_task("case First reply")).pack()
+    Button(login_screen, text="LOGS", width=30, height=1, command = lambda: case_task("case LOGS") ).pack()
+    Button(login_screen, text="Department", width=30, height=1, command = lambda: case_task("case Department")).pack()
+    Button(login_screen, text="Reviewing", width=30, height=1, command = lambda: case_task("case Reviewing")).pack()
+    Button(login_screen, text="Back", width=30, height=1, command = lambda: menu_page()).pack()
 
     widget.pack()
     Main_menu.withdraw()
     login_screen.protocol("WM_DELETE_WINDOW", close)
-
+def case_task(command):
+    cases_Q.put(Task(username_verify.get(),command))
+    
 def swap_page(page):
-
+    
     #chrome_possion("hide")
 
     if page=="Main_menu":
@@ -462,29 +511,53 @@ def search_related_issue():
         Data.append(rows[row].text.split("."))
     print(Data)
 
-def first_reply(x=0):
+def get_message(x=0):
     chrome_possion("show")
-    RMA_page="https://wikinox.mellanox.com/display/FLS/RMA+page+for+script"
-    browser.get(RMA_page)
+    wikinox_page="https://wikinox.mellanox.com/display/FLS/RMA+page+for+script"
+    browser.get(wikinox_page)
     table = browser.find_elements_by_class_name("confluenceTd")
     message=table[x*4+3].text
     return message
 
-def public_comment(command,case_id,messange):
-    if command=="first_reply":
-        initializeOutlook()
-        mail.Subject = "external "+case_id
-        #mail.Subject = case_id
-        mail.Body = messange
-        print(mail.Body)
-        mail.Send()    
+def public_comment(case_id,messange):
+   
+    initializeOutlook()
+    mail.Subject = "external "+case_id
+    #mail.Subject = case_id
+    mail.Body = messange
+    print(mail.Body)
+    mail.Send()    
+def threadmanage():
+    while(True):
+        if not cases_Q.empty():
+            task:Task=cases_Q.queue[0]
+            if "case" not in task.command:
+                process = threading.Thread(target=RMA, args=[task])
+                process.start()
+            else:
+                process = threading.Thread(target=case_comment, args=[task])
+                process.start()
+            while(process.is_alive()):
+                time.sleep(2)#sleep for 1 sec
+                print("wait for previews thread to finish")
+            print("previews thread finished")
+            cases_Q.get()
+            print(task)
+        time.sleep(1)#sleep for 1 sec
+        
+    
+def RMA_task(command=None):
+    cases_Q.put(Task(username_verify.get(),command))
+        
+    
 
-
-def DQ_Sumary_OEM(command=None):
-    chrome_possion("hide")
-    #chrome_possion("show")
+def RMA(task:Task):
+    command=task.command
+    rma_Number=task.case_number
+    
+    #chrome_possion("hide")
+    chrome_possion("show")
     #chrome_driver_lunch()
-    rma_Number = username_verify.get()
     if rma_Number!="":
         
         browser.get(main_url)
@@ -498,9 +571,6 @@ def DQ_Sumary_OEM(command=None):
         browser.find_element_by_id("secondSearchText").send_keys(k)
         browser.find_element_by_id("secondSearchButton").click()
     
-
-
-
         browser.find_element_by_link_text(k).click()
         accountName=browser.find_element_by_id("cas4_ileinner").text
         contact=browser.find_element_by_id("cas3_ileinner").text
@@ -595,14 +665,14 @@ def DQ_Sumary_OEM(command=None):
             mail.Send()      
 
         if command=="all" or command=="review":
-            message=first_reply(x=0)
+            message=get_message(x=0)
             message="Hello "+contact+",\n\n\n"+message
-            public_comment("first_reply",Case_ID,message)
+            public_comment(Case_ID,message)
             
 
 
 def initializeOutlook():
-    
+    pythoncom.CoInitialize()
     global mail
     global outlook
     outlook = win32.Dispatch('outlook.application')
@@ -621,6 +691,8 @@ def initializeOutlook():
 # Designing Main(first) window
  
 def main_account_screen():
+    process = threading.Thread(target=threadmanage, args=[])
+    process.start()
     try:
         global register_screen
         register_screen = Tk()
