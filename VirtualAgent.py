@@ -212,9 +212,6 @@ def LoadCredential(password,username):
 def close():
     register_screen.destroy()
 
-
-    
-
 def Traceability(path,data):
     def write_list(result_list):
         with open(path+'\\Results.txt', 'w') as f:
@@ -238,7 +235,7 @@ def Traceability(path,data):
     write_list(result_list)
     messagebox.showinfo(title="Warning ", message="Done, Plesae find result.txt")
 def case_comment(task:Task):
-    chrome_possion("show")
+    #chrome_possion("show")
     command=task.command
     case_Number=task.case_number
     SF_lightning = "https://mellanox.lightning.force.com/lightning/r/Case/5001T00001QnhArQAJ/view"
@@ -325,8 +322,8 @@ def Traceability_page():
 
         e1=Entry(Traceability_screen, textvariable=file_path,relief=SUNKEN, width=45)
         e1.place(relx = 0.60, rely = 0.75, anchor = CENTER)
-        Button(login_screen, text="Back", width=30, height=1, command = lambda: menu_page()).pack()
         Button(Traceability_screen, text="Convert file", command = lambda: Traceability(file_location,content)).place(relx = 0.12, rely = 0.85, anchor = CENTER)
+        Button(login_screen, text="Back", command = lambda:[login_screen.withdraw(),menu_page()]).pack()
         widget.place( relx = 0.5, rely = 0.35,anchor = CENTER)
         Main_menu.withdraw()
         Traceability_screen.protocol("WM_DELETE_WINDOW", close)
@@ -350,7 +347,7 @@ def RMA_page():
     Button(login_screen, text="summary", width=30, height=1, command = lambda: RMA_task("comment")).pack()
     Button(login_screen, text="Dequeue+Summary", width=30, height=1, command = lambda: RMA_task()).pack()
     Button(login_screen, text="First reply", width=30, height=1, command = lambda: RMA_task("review")).pack()
-    Button(login_screen, text="Back", width=30, height=1, command = lambda: menu_page()).pack()
+    Button(login_screen, text="Back", width=30, height=1, command = lambda:[login_screen.withdraw(),menu_page()]).pack()
     widget.pack()
     Main_menu.withdraw()
     login_screen.protocol("WM_DELETE_WINDOW", close)
@@ -373,7 +370,7 @@ def Case_page():
     Button(login_screen, text="LOGS", width=30, height=1, command = lambda: case_task("case LOGS") ).pack()
     Button(login_screen, text="Department", width=30, height=1, command = lambda: case_task("case Department")).pack()
     Button(login_screen, text="Reviewing", width=30, height=1, command = lambda: case_task("case Reviewing")).pack()
-    Button(login_screen, text="Back", width=30, height=1, command = lambda: menu_page()).pack()
+    Button(login_screen, text="Back", width=30, height=1, command = lambda:[login_screen.withdraw(),menu_page()]).pack()
 
     widget.pack()
     Main_menu.withdraw()
@@ -512,7 +509,7 @@ def search_related_issue():
     print(Data)
 
 def get_message(x=0):
-    chrome_possion("show")
+    #chrome_possion("show")
     wikinox_page="https://wikinox.mellanox.com/display/FLS/RMA+page+for+script"
     browser.get(wikinox_page)
     table = browser.find_elements_by_class_name("confluenceTd")
@@ -555,8 +552,8 @@ def RMA(task:Task):
     command=task.command
     rma_Number=task.case_number
     
-    #chrome_possion("hide")
-    chrome_possion("show")
+    chrome_possion("hide")
+    #chrome_possion("show")
     #chrome_driver_lunch()
     if rma_Number!="":
         
