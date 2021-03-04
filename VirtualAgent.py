@@ -261,15 +261,16 @@ def case_comment(task:Task):
         'case First reply':lambda x:0,
         'case LOGS': lambda x: 2,
         'case Department': lambda x: 3,
-        'case Reviewing': lambda x: 1
+        'case Reviewing': lambda x: 1,
+        'case Reviewing replying': lambda x: 4
     }[task.command](None)
-    browser.find_element_by_xpath('//header[@class="slds-global-header_container branding-header slds-no-print oneHeader"] //button[@title="Close '+case_Number+'"]').click()
     
 
 
     message= get_message(result)
     message="Hello "+contact+",\n\n\n"+message
     public_comment(Case_id,message)
+    browser.find_element_by_xpath('//header[@class="slds-global-header_container branding-header slds-no-print oneHeader"] //button[@title="Close '+case_Number+'"]').click()
 
 def menu_page():
     global Main_menu
@@ -367,9 +368,10 @@ def Case_page():
     widget.lenna_image_png=PhotoImage(file=Main_path+"\\Mellanox.png")
     widget['image'] = widget.lenna_image_png
     Button(login_screen, text="First reply", width=30, height=1, command = lambda: case_task("case First reply")).pack()
-    Button(login_screen, text="LOGS", width=30, height=1, command = lambda: case_task("case LOGS") ).pack()
-    Button(login_screen, text="Department", width=30, height=1, command = lambda: case_task("case Department")).pack()
-    Button(login_screen, text="Reviewing", width=30, height=1, command = lambda: case_task("case Reviewing")).pack()
+    Button(login_screen, text="Reviewing after reply", width=30, height=1, command = lambda: case_task("case Reviewing")).pack()
+    Button(login_screen, text="Reviewing after LOGS", width=30, height=1, command = lambda: case_task("case LOGS") ).pack()
+    Button(login_screen, text="relavent Department after info", width=30, height=1, command = lambda: case_task("case Department")).pack()
+    Button(login_screen, text="Department after replying", width=30, height=1, command = lambda: case_task("case Reviewing replying")).pack()
     Button(login_screen, text="Back", width=30, height=1, command = lambda:[login_screen.withdraw(),menu_page()]).pack()
 
     widget.pack()
