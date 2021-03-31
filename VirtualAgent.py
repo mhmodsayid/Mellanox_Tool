@@ -223,15 +223,23 @@ def Traceability(path,data):
 
     
     assets_list=data.split("\n")
+    browser.implicitly_wait(2)
 
     for asset in assets_list:
-        if asset!='':
-            browser.find_element_by_xpath("/html/body/div/form/div/input").send_keys(asset)
-            browser.find_element_by_xpath('//button[text()="Search"]').click()
-            GUID=browser.find_element_by_xpath("/html/body/div/div[4]/div[2]/li[2]/b").text
-            browser.find_element_by_xpath("/html/body/div/form/div/input").clear()
-            result_list.append(Basic_asset(asset,GUID))
-        pass
+        if "MT" in asset:
+            try:
+                browser.find_element_by_xpath("/html/body/div/form/div/input").clear()
+                browser.find_element_by_xpath("/html/body/div/form/div/input").send_keys(asset)
+                browser.find_element_by_xpath('//button[text()="Search"]').click()
+                GUID=browser.find_element_by_xpath("/html/body/div/div[4]/div[2]/li[2]/b").text
+                browser.find_element_by_xpath("/html/body/div/form/div/input").clear()
+                result_list.append(Basic_asset(asset,GUID))
+            except:
+                print("Null")
+                result_list.append(Basic_asset(asset,"Null"))
+        else:
+            result_list.append(asset+'\n')
+
     write_list(result_list)
     messagebox.showinfo(title="Warning ", message="Done, Plesae find result.txt")
 def case_comment(task:Task):
@@ -289,7 +297,7 @@ def menu_page():
     register_screen.withdraw()
     Main_menu.protocol("WM_DELETE_WINDOW", close)
 def Traceability_page():
-    #chrome_possion("show")#need to deeeletee
+        #chrome_possion("show")#need to deeeletee
         global file_path
         content=""
         file_path=StringVar()
@@ -346,7 +354,7 @@ def RMA_page():
     Button(login_screen, text="Dequeue+Summary+First_reply", width=30, height=1, command = lambda: RMA_task("all")).pack()
     Button(login_screen, text="Dequeue", width=30, height=1, command = lambda: RMA_task("DQ") ).pack()
     Button(login_screen, text="summary", width=30, height=1, command = lambda: RMA_task("comment")).pack()
-    Button(login_screen, text="Dequeue+Summary", width=30, height=1, command = lambda: RMA_task()).pack()
+    Button(login_screen, text="Dequeue+Summary", width=30, height=1, command = lambda: RMA_task("DQ&comment")).pack()
     Button(login_screen, text="First reply", width=30, height=1, command = lambda: RMA_task("review")).pack()
     Button(login_screen, text="Back", width=30, height=1, command = lambda:[login_screen.withdraw(),menu_page()]).pack()
     widget.pack()
@@ -530,7 +538,7 @@ def threadmanage():
     while(True):
         if not cases_Q.empty():
             task:Task=cases_Q.queue[0]
-            if "case" not in task.command:
+            if task.command != None and "case" not in task.command:
                 process = threading.Thread(target=RMA, args=[task])
                 process.start()
             else:
@@ -581,9 +589,9 @@ def RMA(task:Task):
 
         Case_ID=browser.find_element_by_xpath('/html/body/div[4]/div[2]/div[4]/table/tbody/tr[1]/td[4]/div').text
 
-        if command==None or command=="DQ" or command=="all":
+        if command=="DQ&comment" or command=="DQ" or command=="all":
             DQ()
-        if command==None or command=="comment" or command=="all":
+        if command=="DQ&comment" or command=="comment" or command=="all":
             #get RMA summery
             browser.find_element_by_xpath('/html/body/div[4]/div[2]/div[4]/table/tbody/tr[2]/td[2]/div/a').click()                
             assets_Size_int=browser.find_element_by_id("00N50000002RhrW_ileinner").text
